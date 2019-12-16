@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html lang="pt-br">
+<meta charset="UTF-8">
+
+<head>
+<title>O Modelo do Dilema do Prisioneiro</title>
+<meta charset="UTF-8">
+
+<script type="text/javascript"
+	src="https://cdn.plot.ly/plotly-latest.min.js">
+</script>
+
+<script type="text/javascript"
+  	src="http://canzian.fsc.ufsc.br/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+
+<style>
+.html {
+	display: none;
+	// color:red;
+}
+</style>
+
+</head>
+
+<body style='width:600px;margin:auto;text-align:justify;background-color:#F5F5DC'>
+<div align="left">
+<p style="text-align:center;font-weight:bold;font-size:16pt">
+O Modelo do Dilema do Prisioneiro</p>
+<table border = 3 width = 800 height = 600 align = left>
+
+<tr>
+<td width = 600>
+<div align="center">
+<canvas id="cnv" style="width:430px;height:430px;border:1px solid black"></canvas>
+<br>
+<div id="counter"></div>
+<br>
+<div id="estimativa" style="width:500px;height:300px;margin:auto"></div>
+</td>
+<td width = 400>
+<div align="center">
+<br>Tamanho da Rede </br>
+1<input type="range" id="tamanho"
+          min="1" max="100" 
+          onInput="atualiza()"> 100<br>
+ 	<div id="tamanhoDiv"></div>  
+    
+<br>Energia de Interação(Defector) </br>
+0<input type="range" id="defector"
+          min="0" max="100"
+          onInput="atualiza()"> 100<br>
+          <div id="defcDiv"></div>  
+          
+<br>Energia de Interação(Cooperator) </br>
+0<input type="range" id="coperator"
+          min="0" max="100" 
+          onInput="atualiza()"> 100<br>
+   		<div id="copDiv"></div>
+          
+          
+<br>Temperatura</br>
+0<input type="range" id="k"
+          min="0" max="500" 
+          onInput="atualiza()"> 500<br>
+            <div id="kDiv"></div>
+<br>
+<input type="button" value="ANDA/PARA" onClick="andaPara()">
+<input type="button" value="Recomeçar" onClick="window.location.reload()"</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<script>
+/*
+   * todo jogador joga: primeiro os jogadores sao colocados em uma
+   * fila desordenada. para cada jogador desta fila, escolhemos
+   * aleatoriamente um dos vizinhos para ser o adversario.
+   * autores: G.L.Nunes, P.S.Balestieri e V.Rech
+*/
+
+// Nesta seção GLOBAL são definidas as variáveis
+// acessadas por todas as funções (constantes e variáveis globais)
+
+var MC = 1000;		// constante
+var pontos = 5;		// constante
+var cooperator = 1;	// constante
+var defector = -1;	// constante
+var PASSO = 1;		// constante
+
+var L;	// lado do quadrado
+var N;	// area do quadrado
+var b;	// def
+var a;	// cop
+var K;	//temperatura
+var VOLTA; // quebra de linha????
+var zz = [];
+var s = [];
+var dens = [];
+
+var k,w,bant,soma,densidade,delta_b,mc; // variaveis diversas
+
+var	cnv = document.getElementById("cnv");
+var	ctx = cnv.getContext("2d");
+
+var tictac; // timer
+
+// depois que tudo estivar carregado, chama a função atualiza()
+window.onload = function() { atualiza() };
+
+// chama a função atualiza() (o que aconteceria se alguém mexesse um botão)
+/*
+   definicoes abaixo permitem acessar os quatro vizinhos
+   numa lista unidimensional que simula uma  regiao
+   bidimensional
+*/
+function direita(k)	{ return(((k+PASSO) >= N) ? k+PASSO-N : k+PASSO) };
+function esquerda(k){ return(((k-PASSO) < 0) ? k-PASSO+N : k-PASSO)  };
+function acima(k)   { return(((k+VOLTA) >= N) ? k+VOLTA-N : k+VOLTA) };
+function abaixo(k)  { return(((k-VOLTA) < 0) ? k-VOLTA+N : k-VOLTA)  };
+
+/* o delta de Kronecker */
+function delta(a,b)	{ return((a == b) ? 1 : 0) };
+
+/*
+  a funcao abaixo retorna, no ponteiro  u, uma lista com os numeros
+  0,1,2,3,4,....,LL  desordenados
+  o valor de LL  nao deve ultrapassar 500.000
+  ou L = 707
+*/
+function embaralha(LL) {
+	var xx = [];
+	var u = [];
+	for (var n=0; n<LL; n++) xx[n]=n;
+	for (var k=LL; k>0; k--) {
+		var j = parseInt(Math.random()*LL)%k;
+		u[k]=xx[j];
+		/* retira a posicao j de xx */
+		xx.splice(j,1);
+  	}
+  	return u;
+}
+
+function transicao(E, K){
+	var y;
+	if (K==0.0){
+    	if (E<=0.0) y = 1.0;
+        else y = 0.0;
+	}
+	else
+		y = 1.0/(1.0 + Math.exp(E/K));
+	return(y);
+}
+
+function atualiza() {
+
+	if (tictac) clearInterval(tictac);
+
+	L = parseInt(document.getElementById("tamanho").value);
+	document.getElementById("tamanhoDiv").innerHTML = L;
+
+	b = parseInt(document.getElementById("defector").value);
+	document.getElementById("defcDiv").innerHTML = b;
+
+	a = parseInt(document.getElementById("coperator").value);
+	document.getElementById("copDiv").innerHTML = a;
+
+	K = parseInt(document.getElementById("k").value);
+	document.getElementById("kDiv").innerHTML = K;
+	
+	N = L*L;
+
+	VOLTA = L;	
+
+	mc = 0;
+
+	/* a coisa comeca aqui */
+	/* escolhemos inteiros de 0 a N em desordem */
+	zz = embaralha(N);
+
+	/*  escolhemos os defectors e cooperators */
+	s = [];
+	for (n=0;n<N;n++){
+		if (parseInt(Math.random()*2)%2) s[n] = 1;
+		else s[n] = -1;
+	}
+
+	ctx.setTransform(cnv.width/L,0,0,cnv.height/L,0,0);
+	ctx.lineWidth = L/cnv.width;
+
+	tictac = setInterval("evolui()",10);
+
+}
+
+function inicia() {
+	atualiza();
+}
+
+function andaPara() {
+	if (tictac) {
+		clearInterval(tictac);
+		tictac = null;
+	}
+	else tictac = setInterval("evolui()",10);
+}
+
+function evolui() {
+	for (var n=0;n<N;n++) {
+		
+		var jogador = zz[n];
+		var adv = parseInt(Math.random()*4)%4;
+
+		switch(adv) {
+			case 0: adver = direita(jogador); break;
+			case 1: adver = esquerda(jogador); break;
+			case 2: adver = acima(jogador); break;
+			case 3: adver = abaixo(jogador); break;
+		}
+
+		if ( s[jogador] != s[adver] ){
+			/* payoff do jogador */
+			var aqui = jogador;
+			var soma = 0;
+			/* olhar os quatro vizinhos */
+			var m;
+			m = direita(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = esquerda(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = acima(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = abaixo(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			if ( s[aqui] == cooperator ) var Ej = a + soma;
+			else var Ej = b*soma;
+
+			/* payoff do adversario */
+			var aqui = adver;
+			var soma = 0.0;
+			/* olhar os quatro vizinhos */
+			var m;
+			m = direita(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = esquerda(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = acima(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			m = abaixo(aqui);
+			soma += 1.0*delta(s[aqui],s[m]);
+			if ( s[aqui] == cooperator ) var Ea = a + soma;
+			else var Ea = b * soma;
+
+			var w = transicao(Ej-Ea,K);
+
+			/* decidimos agora se muda a estrategia */
+			r = Math.random();
+			if (r <= w) s[jogador] = s[adver];
+		}
+	} /* fim do jogo...calcular a densidade agora */
+	
+	dens[mc]=0;
+	for(n=0;n<N;n++){
+		dens[mc]+=(s[n]+1)/2;
+	}
+	dens[mc]=dens[mc]/N;
+	console.log(dens[mc]);
+	
+	ctx.clearRect(0,0,L,L);
+	//console.log(L);
+	
+	for(n=0;n<N;n++){
+		var x = n-parseInt(n/L)*L;
+		var y = parseInt(n/L);
+		//console.log(mc,x,y,s[n]);
+		ctx.beginPath();
+		ctx.rect(x,y,1,1);
+		if (s[n]<0) ctx.fillStyle = ctx.strokeStyle = "black";
+			else ctx.fillStyle = ctx.strokeStyle = "grey";
+		ctx.fill();
+		ctx.stroke();
+	}
+		
+	
+	var tArr = [];
+	var retaArr = [];
+	
+	for (var i=0;i<mc;i++) {
+		tArr[i] = i;
+		retaArr[i] = dens[i];
+	}
+
+	var grEstimativa = document.getElementById('estimativa');
+
+	Plotly.newPlot( grEstimativa,
+		[	{ x: tArr, y: retaArr,
+			  name: "reta",
+			  mode: 'lines' },
+			
+			  ],
+			{ margin: { t: 25, b:50 },
+			  xaxis: { title: 'Passo de Monte Carlo' , tickformat: '0f' },
+			  yaxis: { title: 'Densidade de Coperator', tickformat: '0.2f' } });
+		
+	mc++;
+	if (mc == 400){
+	andaPara();
+	}
+}  // aqui acaba a função evolui
+
+/*
+	o que segue está solto na seção global do código
+	e não parece estar adaptado às suas variáveis.
+	Do jeito que tá não dá pra seaber pois não 
+	trata nenhuma das variáveis do seu programa
+*/
+
+</script>
+
+</body>
+</hmtl>
