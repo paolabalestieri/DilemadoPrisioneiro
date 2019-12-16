@@ -16,7 +16,10 @@ daqueles sistemas. Além das propriedades de equilíbrio e não equilíbrio dos
 sistemas, tais modelos permitem também uma avaliação do comportamento
 crítico dos sistemas, quando existente. Um exemplo interessante de modelo
 matemático para o estudo de sistemas complexos é o chamado modelo do
-dilema do prisioneiro (PD- Prisoner's Dilemma ), que aqui será apresentado. 
+dilema do prisioneiro (PD- Prisoner's Dilemma ), que aqui será apresentado.
+	
+<figure><img align=midle src="image/teste.gif" width="500"></figure>
+	
 <p>De um ponto de vista puramente físico, mesmo a versão mais simples do
 modelo pode apresentar comportamento caótico, diferentes fases absorventes,
 coexistência de estados e transições de fases entre os estados absorventes e a
