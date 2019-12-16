@@ -1,58 +1,16 @@
 <!DOCTYPE HTML>
 <html lang="pt-br">
+	
+# O Modelo do Dilema do Prisioneiro
+	
+#### Prof. Nelson Canzian da Silva
 
-<head>
+#### Autor : Paola dos Santos Balestieri
 
-<title>O Modelo do Dilema do Prisioneiro</title>
 <meta charset="UTF-8">
-
-<script type="text/javascript"
-	src="https://cdn.plot.ly/plotly-latest.min.js">
-</script>
-
-<script type="text/javascript"
-  	src="http://canzian.fsc.ufsc.br/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    extensions: ["tex2jax.js"],
-    jax: ["input/TeX","output/HTML-CSS"],
-    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
-  });
-</script>
-
-<style>
-.html {
-	display: none;
-	// color:red;
-}
-</style>
 
 </head>
 
-<body style='width:600px;margin:auto;text-align:justify;background-color:#F5F5DC'>
-
-<div style="text-align:center">
-<p style="text-align:center;font-weight:bold;font-size:10pt">
-Universidade Federal de Santa Catarina
-</p>
-<p style="text-align:center;font-weight:bold;font-size:10pt">
-
-Centro de Ciências Físicas e Matemáticas
-Departamento de Física</p>
-
-</div>
-
-<p style="text-align:center;font-weight:bold;font-size:20pt">
-O Modelo do Dilema do Prisioneiro</p>
-</div>
-<div style="text-align:center">
-<p style="text-align:center;font-weight:bold;font-size:10pt">
-Prof. Nelson Canzian da Silva</p>
-<p style="text-align:center;font-weight:bold;font-size:11pt">
-Autor : Paola dos Santos Balestieri</p>
-</div>
 <p>O estudo de sistemas complexos é realizado teoricamente através da introdução de modelos relativamente simples que imitam o comportamento real
 daqueles sistemas. Além das propriedades de equilíbrio e não equilíbrio dos
 sistemas, tais modelos permitem também uma avaliação do comportamento
@@ -75,9 +33,7 @@ oponente. Assim, se a recompensa recebida pelo jogador for maior ou igual
 àquela recebida pelo seu oponente, o jogador permanece com sua estratégia.
 Por outro lado, ele muda sua estratégia para aquela do oponente. Neste situação a tomada de decisão é completamente racional e semelhante à taxa de transição de Fermi-Dirac:
 
-\begin{equation}
-w = \frac{1}{\left( 1+ e^{\frac{Ep - Eo}{K}} \right)}
-\end{equation}
+$$ w = \frac{1}{\left( 1+ e^{\frac{Ep - Eo}{K}} \right)}$$
 
 
 <p> em T = 0 , se pensarmos no valor da recompensa como sendo o valor da energia. Para incluir algum grau de irracionalidade é possível definir uma probabilidade de transição para a mudança de estratégia
@@ -115,10 +71,4 @@ onde esse <b>S</b> representa o Delta de Kronecker.  Por tanto a probabilidade d
 </div>
 
 </body>
-<script>
-function botao(){
-window.location = "mct.html";
-}
-
-</script>
 </html>
